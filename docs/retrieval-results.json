@@ -1,0 +1,151 @@
+{
+  "k": 3,
+  "cases": 12,
+  "recall_at_k": 1.0,
+  "mrr": 1.0,
+  "empty_query_accuracy": 1.0,
+  "scope": "Small synthetic retrieval fixture; not a real-world benchmark or generation quality score",
+  "rows": [
+    {
+      "question": "API 超过速率限制后应该怎么重试？",
+      "sources": [
+        "api-policy.md"
+      ],
+      "retrieved": [
+        "api-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "API Key 可以写入浏览器吗？",
+      "sources": [
+        "api-policy.md"
+      ],
+      "retrieved": [
+        "api-policy.md",
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "HTTP 请求超时时怎么办？",
+      "sources": [
+        "api-policy.md"
+      ],
+      "retrieved": [
+        "api-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "年假有几天，需要提前多久申请？",
+      "sources": [
+        "leave-policy.md"
+      ],
+      "retrieved": [
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "连续病假超过两天有什么要求？",
+      "sources": [
+        "leave-policy.md"
+      ],
+      "retrieved": [
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "每周远程办公几天？",
+      "sources": [
+        "leave-policy.md"
+      ],
+      "retrieved": [
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "P0 事故发生时要通知谁？",
+      "sources": [
+        "incident-playbook.md"
+      ],
+      "retrieved": [
+        "incident-playbook.md",
+        "api-policy.md",
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "错误率达到多少时考虑回滚？",
+      "sources": [
+        "incident-playbook.md"
+      ],
+      "retrieved": [
+        "incident-playbook.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "事故恢复后何时完成复盘？",
+      "sources": [
+        "incident-playbook.md"
+      ],
+      "retrieved": [
+        "incident-playbook.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "年假审批与事故回滚由谁负责？",
+      "sources": [
+        "leave-policy.md",
+        "incident-playbook.md"
+      ],
+      "retrieved": [
+        "incident-playbook.md",
+        "leave-policy.md"
+      ],
+      "recall": 1.0,
+      "rr": 1.0,
+      "correct_empty": null
+    },
+    {
+      "question": "星际飞船曲率引擎",
+      "sources": [],
+      "retrieved": [],
+      "recall": null,
+      "rr": 0,
+      "correct_empty": true
+    },
+    {
+      "question": "quantum penguin teleportation",
+      "sources": [],
+      "retrieved": [],
+      "recall": null,
+      "rr": 0,
+      "correct_empty": true
+    }
+  ]
+}

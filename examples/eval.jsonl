@@ -1,0 +1,12 @@
+{"question":"API 超过速率限制后应该怎么重试？","sources":["api-policy.md"]}
+{"question":"API Key 可以写入浏览器吗？","sources":["api-policy.md"]}
+{"question":"HTTP 请求超时时怎么办？","sources":["api-policy.md"]}
+{"question":"年假有几天，需要提前多久申请？","sources":["leave-policy.md"]}
+{"question":"连续病假超过两天有什么要求？","sources":["leave-policy.md"]}
+{"question":"每周远程办公几天？","sources":["leave-policy.md"]}
+{"question":"P0 事故发生时要通知谁？","sources":["incident-playbook.md"]}
+{"question":"错误率达到多少时考虑回滚？","sources":["incident-playbook.md"]}
+{"question":"事故恢复后何时完成复盘？","sources":["incident-playbook.md"]}
+{"question":"年假审批与事故回滚由谁负责？","sources":["leave-policy.md","incident-playbook.md"]}
+{"question":"星际飞船曲率引擎","sources":[]}
+{"question":"quantum penguin teleportation","sources":[]}

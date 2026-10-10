@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledge-lens"
+version = "0.1.0"
+description = "从本地文档到带引用的回答，检索路径始终可见。"
+requires-python = ">=3.11"
+dependencies = []
+license = {text = "MIT"}
+
+[tool.setuptools.package-data]
+knowledge_lens = ["static/*"]
+
+[tool.setuptools.packages.find]
+include = ["knowledge_lens*"]
