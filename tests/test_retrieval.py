@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from knowledge_lens.evaluate import evaluate
-from knowledge_lens.retrieval import Index, chunk_text, tokenize
+from knowledge_lens.retrieval import Index, chunk_articles, chunk_text, split_document, tokenize
 from knowledge_lens.service import ask
 from knowledge_lens.provider import ProviderError
 
@@ -88,6 +88,38 @@ class RetrievalTests(unittest.TestCase):
         for question in [None, "", " " * 3, "a" * 2001]:
             with self.assertRaises(ValueError):
                 ask(self.index, question)
+
+    def test_article_chunks_keep_statutes_whole_and_offsets_exact(self):
+        text = "# 劳动合同法\n\n## 第一章\n\n" + "".join(f"第{n}条 条文内容{'字' * 40}。\n\n" for n in "一二三四五六") + "第七条 " + "长" * 300 + "\n"
+        chunks = chunk_articles("law.md", text, 120)
+        self.assertEqual(chunks, chunk_articles("law.md", text, 120))
+        for chunk in chunks:
+            self.assertEqual(text[chunk.start:chunk.end], chunk.text)
+            self.assertLessEqual(len(chunk.text), 120)
+        # Short articles are never split mid-way; only the oversized article falls back to windows.
+        for n in "一二三四五六":
+            self.assertEqual(sum(f"第{n}条" in c.text for c in chunks), 1)
+            holder = next(c for c in chunks if f"第{n}条" in c.text)
+            self.assertIn("字" * 40 + "。", holder.text)
+        self.assertEqual("".join(c.text for c in chunks).replace("\n", ""), text.replace("\n", ""))
+        with self.assertRaises(ValueError):
+            split_document("law.md", text, 120, 0, "semantic")
+
+    def test_evidence_hit_requires_clause_in_retrieved_chunk(self):
+        root = Path(self.temp.name)
+        law = root / "law"
+        law.mkdir()
+        (law / "contract.md").write_text("第十九条 劳动合同期限三年以上的，试用期不得超过六个月。\n\n第二十条 试用期工资另行约定。\n", encoding="utf-8")
+        index = Index(root / "law.sqlite3")
+        index.ingest(law, 50, 0, "article")
+        cases = root / "law.jsonl"
+        cases.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in [
+            {"question": "试用期最长多久", "sources": ["contract.md"], "evidence": ["试用期不得超过六个月"]},
+            {"question": "试用期工资", "sources": ["contract.md"], "evidence": ["不存在的条文"]}]), encoding="utf-8")
+        result = evaluate(index, cases, 1)
+        self.assertEqual(result["recall_at_k"], 1)
+        self.assertEqual(result["evidence_hit_at_k"], 0.5)
+        self.assertEqual(result["rows"][0]["evidence_rank"], 1)
 
     def test_evaluation_document_dedup_and_metrics(self):
         cases = Path(self.temp.name) / "eval.jsonl"

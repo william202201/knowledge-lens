@@ -42,6 +42,50 @@ def chunk_text(source: str, text: str, size: int = 500, overlap: int = 80) -> li
     return result
 
 
+# A new unit starts at a Markdown heading or at a statute article such as “第十九条”.
+UNIT_START = re.compile(r"^(#{1,6}\s|第[一二三四五六七八九十百零〇两\d]+条)", re.MULTILINE)
+
+
+def chunk_articles(source: str, text: str, size: int = 500) -> list[Chunk]:
+    """Structure-aware chunking: keep each heading/article whole and pack neighbours up to `size` characters.
+
+    An article longer than `size` falls back to fixed windows so no chunk grows without bound.
+    """
+    if size < 50:
+        raise ValueError("Chunk size must be >= 50")
+    starts = sorted({0, *(m.start() for m in UNIT_START.finditer(text))})
+    units = [(a, b) for a, b in zip(starts, starts[1:] + [len(text)]) if text[a:b].strip()]
+    spans, current = [], None
+    for a, b in units:
+        if b - a > size:
+            if current:
+                spans.append(current)
+                current = None
+            spans.extend((c.start + a, c.end + a) for c in chunk_text(source, text[a:b], size, 0))
+        elif current and b - current[0] <= size:
+            current = (current[0], b)
+        else:
+            if current:
+                spans.append(current)
+            current = (a, b)
+    if current:
+        spans.append(current)
+    result = []
+    for a, b in spans:
+        part = text[a:b]
+        digest = hashlib.sha256(f"{source}\0{a}\0{part}".encode()).hexdigest()[:16]
+        result.append(Chunk(digest, source, a, b, part))
+    return result
+
+
+def split_document(source: str, text: str, size: int = 500, overlap: int = 80, strategy: str = "fixed") -> list[Chunk]:
+    if strategy == "fixed":
+        return chunk_text(source, text, size, overlap)
+    if strategy == "article":
+        return chunk_articles(source, text, size)
+    raise ValueError("strategy must be 'fixed' or 'article'")
+
+
 class Index:
     def __init__(self, path: str | Path):
         self.path = str(path)
@@ -58,7 +102,7 @@ class Index:
         finally:
             db.close()
 
-    def ingest(self, directory: Path, size: int = 500, overlap: int = 80) -> dict:
+    def ingest(self, directory: Path, size: int = 500, overlap: int = 80, strategy: str = "fixed") -> dict:
         directory = directory.resolve()
         if not directory.is_dir():
             raise ValueError("Document directory does not exist")
@@ -70,7 +114,7 @@ class Index:
                     raise ValueError(f"Document exceeds 1 MB: {file.name}")
                 source = file.relative_to(directory).as_posix()
                 sources.append(source)
-                chunks.extend(chunk_text(source, file.read_text(encoding="utf-8"), size, overlap))
+                chunks.extend(split_document(source, file.read_text(encoding="utf-8"), size, overlap, strategy))
         if not chunks:
             raise ValueError("No non-empty UTF-8 Markdown or text documents found")
         # Rebuild atomically: stale chunks disappear; failed reads preserve the old index.
