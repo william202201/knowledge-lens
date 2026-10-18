@@ -8,7 +8,22 @@
 
 ![实际运行截图](docs/demo.jpg)
 
-这是使用 AI 辅助开发的学习与作品集项目。示例资料和工单均为虚构；没有企业使用量、真实客户或生产效果的声明。
+这是使用 AI 辅助开发的学习与作品集项目。`examples/docs` 是虚构的演示资料；`examples/labor-law` 是 12 部公开劳动法规，用于真实语料评测。没有企业使用量、真实客户或生产效果的声明。
+
+## 公开法规语料评测
+
+用 12 部劳动法规（约 6.9 万字）和 50 道口语化测试题评测检索效果，对比切块方式与 Top-k：
+
+| 配置 | 条文命中率 Top-3 | 条文命中率 Top-5 |
+| --- | ---: | ---: |
+| 固定长度 500 字（默认） | 69% | 84% |
+| 按条文切块 500 字 | 78% | 82% |
+| 固定长度 800 字 | 87% | 89% |
+| **按条文切块 800 字** | **87%** | **91%** |
+
+“条文命中率”要求检索到的片段完整包含标注的原文证据句，比“找对文件”更严格。剩下的错误主要是用词对不上（如问“购物卡代替工资”，原文是“以货币形式支付”），5 道无关题只有 1 道检索为空。完整对比、错误分析和取舍见 [docs/labor-law-evaluation.md](docs/labor-law-evaluation.md)。
+
+![劳动法规问答截图](docs/labor-law-demo.jpg)
 
 ## 快速开始
 
@@ -29,7 +44,8 @@ python -m knowledge_lens serve
 - 中英文分词、BM25 排序、相对分数过滤。
 - 稳定片段 ID、源文件名与字符偏移，可回查证据。
 - 严格回答结构与引用 ID 校验；证据不足时拒答。
-- 12 条合成检索案例，输出 Recall@3、MRR 和无匹配查询准确率。
+- 两种切块方式：固定长度滑动窗口，或按标题/法条切块（`--strategy article`），保证一条法条不被切断。
+- 两套评测：12 条合成回归案例；12 部公开劳动法规 + 50 道测试题，输出文档召回率、条文命中率、MRR 和无关问题拒答率。
 
 离线模式返回真实检索片段，不进行语言生成。检索不到任何片段时直接拒答。在线模式发送问题和检索证据到 OpenAI，使用严格 JSON Schema，展示合法引用。引用 ID 校验能防止虚构引用，**不能证明每句话在语义上得到支持**。
 
@@ -38,6 +54,15 @@ python -m knowledge_lens serve
 ```bash
 python -m knowledge_lens ask "API 超过速率限制后应该怎么重试？"
 python -m knowledge_lens evaluate
+
+# 公开劳动法规知识库
+python -m knowledge_lens --db labor.sqlite3 ingest examples/labor-law --strategy article --chunk-size 800
+python -m knowledge_lens --db labor.sqlite3 ask "试用期最长可以约定多久？"
+python -m knowledge_lens --db labor.sqlite3 evaluate --cases examples/labor-law-eval.jsonl --k 5
+python -m knowledge_lens --db labor.sqlite3 serve   # 网页版
+
+# 复现切块与 Top-k 对比表
+python scripts/sweep_labor_law.py
 ```
 
 可在子命令之前添加 `--db /path/to/demo.sqlite3`，切换 SQLite 文件。服务默认只监听本机地址。
@@ -62,7 +87,7 @@ python -m knowledge_lens serve --live
 python -m unittest discover -s tests -v
 ```
 
-本地 Python 3.13 上 18 项测试通过，包含真实回环 HTTP 集成测试。GitHub Actions 配置为 Python 3.11 / 3.13；远端运行结果以 CI 为准。
+本地 Python 3.13 上 20 项测试通过，包含真实回环 HTTP 集成测试。GitHub Actions 配置为 Python 3.11 / 3.13；远端运行结果以 CI 为准。
 
 - [架构与取舍](docs/architecture.md)
 - [验证记录](docs/verification.md)
