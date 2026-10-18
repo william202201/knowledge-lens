@@ -66,7 +66,7 @@ python -m unittest discover -s tests -v
 
 - [架构与取舍](docs/architecture.md)
 - [验证记录](docs/verification.md)
-- [面试演示与讲解](docs/interview.md)
+- [演示步骤与设计取舍](docs/walkthrough.md)
 
 ## 边界与后续工作
 
